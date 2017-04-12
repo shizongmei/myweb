@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        canvas {
+            border: 1px solid red;
+        }
+    </style>
+</head>
+<body>
+<canvas width="800" height="600"></canvas>
+</body>
+<script>
+
+    var colors=(function(){
+        return ( "aliceblue,antiquewhite,aqua,aquamarine,azure,beige,bisque,black,blanchedalmond,blue," +
+        "blueviolet,brown,burlywood,cadetblue,chartreuse,chocolate,coral,cornflowerblue,cornsilk," +
+        "crimson,cyan,darkblue,darkcyan,darkgoldenrod,darkgray,darkgreen,darkgrey,darkkhaki,darkmagenta," +
+        "darkolivegreen,darkorange,darkorchid,darkred,darksalmon,darkseagreen,darkslateblue,darkslategray," +
+        "darkslategrey,darkturquoise,darkviolet,deeppink,deepskyblue,dimgray,dimgrey,dodgerblue,firebrick," +
+        "floralwhite,forestgreen,fuchsia,gainsboro,ghostwhite,gold,goldenrod,gray,green,greenyellow,grey," +
+        "honeydew,hotpink,indianred,indigo,ivory,khaki,lavender,lavenderblush,lawngreen,lemonchiffon," +
+        "lightblue,lightcoral,lightcyan,lightgoldenrodyellow,lightgray,lightgreen,lightgrey,lightpink," +
+        "lightsalmon,lightseagreen,lightskyblue,lightslategray,lightslategrey,lightsteelblue,lightyellow," +
+        "lime,limegreen,linen,magenta,maroon,mediumaquamarine,mediumblue,mediumorchid,mediumpurple," +
+        "mediumseagreen,mediumslateblue,mediumspringgreen,mediumturquoise,mediumvioletred,midnightblue," +
+        "mintcream,mistyrose,moccasin,navajowhite,navy,oldlace,olive,olivedrab,orange,orangered,orchid," +
+        "palegoldenrod,palegreen,paleturquoise,palevioletred,papayawhip,peachpuff,peru,pink,plum,powderblue," +
+        "purple,rebeccapurple,red,rosybrown,royalblue,saddlebrown,salmon,sandybrown,seagreen,seashell,sienna," +
+        "silver,skyblue,slateblue,slategray,slategrey,snow,springgreen,steelblue,tan,teal,thistle,transparent," +
+        "tomato,turquoise,violet,wheat,white,whitesmoke,yellow,yellowgreen" ).split(',');
+    })();
+
+    var canvas = document.querySelector("canvas");
+    var ctx = canvas.getContext("2d");
+
+    function Draw(opt){
+        //必填项
+        if(!opt) throw new Error("参数必填");
+
+        var prop={start:"",num:""};
+        for(var key in prop){
+            if(!prop.hasOwnProperty(key)){
+                throw new Error("请填写参数：key");
+            }
+        }
+
+        //可选参数
+        var defaultOpt={
+            bigX:300,
+            bigY:300,
+            bigR:150,
+            smallR:30,
+            start:0
+        }
+        for(var key in defaultOpt){
+            opt[key]=opt[key]||defaultOpt[key];
+        }
+
+        //混入继承，将opt中的属性拷贝到this中
+        for(var key in opt){
+            this[key]=opt[key];
+        }
+       this.ctx= this.canvas.getContext("2d");
+       this.single=2*Math.PI/this.data.length;//每相邻小圆的弧度差
+       this.draw();
+    }
+    Draw.prototype={
+        constructor:Draw,
+        draw: function () {
+            var self=this;
+            var timer=setInterval(function () {
+
+                self.ctx.clearRect(0,0,self.canvas.width,self.canvas.height);
+
+                self.start+=0.01*Math.PI;
+                self.drawBingCircle();
+                self.drawSmallCircles();
+
+            },100)
+
+        },
+        drawBingCircle: function () {
+            var ctx=this.ctx;
+            ctx.beginPath();
+            ctx.arc(this.bigX,this.bigY,this.bigR,0,2*Math.PI);
+            ctx.stroke();
+        },
+
+        drawSmallCircles: function () {
+            var ctx=this.ctx;
+            //设置文字属性
+            ctx.fillStyle="blue";
+            ctx.font="20px microsoft yahei";
+            ctx.textAlign="center";
+            ctx.textBaseline="middle";
+
+            for(var i=0;i<this.data.length;i++){
+                var radins=this.start+this.single*i;//每个小圆对应的弧度值
+                //绘制小球
+                this.drawSmallCircle(radins,colors[i]);
+                //绘制文字
+                this.drawSmallText(radins,this.data[i]);
+            }
+        },
+        drawSmallCircle: function (radins,color) {
+            var ctx=this.ctx;
+            //计算小圆的坐标
+            var h=Math.sin(radins)*this.bigR;
+            var b=Math.cos(radins)*this.bigR;
+            var x=this.bigX+b;
+            var y=this.bigY+h;
+            ctx.beginPath();
+            ctx.fillStyle=color;
+            ctx.arc(x,y,this.smallR,0,2*Math.PI);
+            ctx.fill();
+
+
+        },
+
+        drawSmallText: function (radins,text) {
+            var ctx=this.ctx;
+            //计算小圆的坐标
+            var h=Math.sin(radins)*this.bigR;
+            var b=Math.cos(radins)*this.bigR;
+            var x=this.bigX+b;
+            var y=this.bigY+h;
+
+            ctx.fillStyle="black";
+            ctx.fillText(text,x,y)
+        }
+    }
+
+
+        new Draw({
+            canvas:canvas,
+            bigX:300,
+            bigY:300,
+            bigR:150,
+            smallR:40,
+            start:0,
+            data:["大前端","Java","Android","PHP","Python","Javascript","NodeJS"],
+        });
+
+
+
+
+
+
+</script>
+</html>
